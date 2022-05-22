@@ -4,44 +4,9 @@
 
 // Adapted from https://github.com/pgovind/runtime/blob/8f686549aa6014926ec244a32d961b090a72d9f8/src/libraries/System.Text.RegularExpressions/src/System/Text/RegularExpressions/RegexAhoCorasick.cs
 
+using System.Runtime.InteropServices;
+
 namespace Regal.AhoCorasick;
-
-internal class TrieNode
-{
-    public TrieNode()
-    {
-        Children = new Dictionary<char, int>();
-        IsLeaf = false;
-        Parent = -1;
-        ParentCharacter = char.MaxValue;
-        SuffixLink = -1;
-        WordID = -1;
-        DictionaryLink = -1;
-    }
-
-    public Dictionary<char, int> Children;
-
-    public bool IsLeaf;
-
-    public int Parent;
-
-    public char ParentCharacter;
-
-    public int SuffixLink;
-
-    public int DictionaryLink;
-
-    public int WordID;
-
-#if DEBUG
-    public string? Path;
-    public string? SuffixLinkPath;
-    public string? DictionaryLinkPath;
-
-    public override string ToString() =>
-        $"Path: {Path} Suffix Link: {SuffixLinkPath} Dictionary Link: {DictionaryLinkPath}";
-#endif
-}
 
 internal class AhoCorasickMatcher
 {
@@ -67,7 +32,7 @@ internal class AhoCorasickMatcher
             AddString(words[i], i);
         }
 
-        Initialize();
+        AhoCorasickBuilder.BuildTrieLinks(CollectionsMarshal.AsSpan(_trie));
     }
 
     public void AddString(string word, int wordID)
@@ -82,7 +47,7 @@ internal class AhoCorasickMatcher
                 {
                     SuffixLink = -1, // If not - add vertex
                     Parent = currentVertex,
-                    ParentCharacter = c,
+                    AccessingCharacter = c,
 #if DEBUG
                     Path = word.AsSpan(0, i + 1).ToString()
 #endif
@@ -95,72 +60,6 @@ internal class AhoCorasickMatcher
         // Mark the end of the word and store its ID
         _trie[currentVertex].IsLeaf = true;
         _trie[currentVertex].WordID = wordID;
-    }
-
-    private void Initialize()
-    {
-        Queue<int> vertexQueue = new Queue<int>();
-        vertexQueue.Enqueue(RootNode);
-        while (vertexQueue.TryDequeue(out int currentVertex))
-        {
-            CalculateSuffixAndDictionaryLinks(currentVertex);
-
-            foreach (int vertex in _trie[currentVertex].Children.Values)
-            {
-                vertexQueue.Enqueue(vertex);
-            }
-        }
-    }
-
-    private void CalculateSuffixAndDictionaryLinks(int vertex)
-    {
-        TrieNode node = _trie[vertex];
-        if (vertex == RootNode)
-        {
-            node.SuffixLink = RootNode;
-            node.DictionaryLink = RootNode;
-            goto End;
-        }
-
-        // one character substrings
-        if (node.Parent == RootNode)
-        {
-            node.SuffixLink = RootNode;
-            node.DictionaryLink = node.IsLeaf ? vertex : _trie[node.SuffixLink].DictionaryLink;
-            goto End;
-        }
-
-        // To calculate the suffix link for the current vertex, we need the suffix
-        // link for the parent and the character that moved us to the
-        // current vertex.
-        int curBetterVertex = _trie[node.Parent].SuffixLink;
-        char chVertex = node.ParentCharacter;
-        while (true)
-        {
-            // If there is an edge with the needed char, update the suffix link
-            // and leave the cycle
-            if (_trie[curBetterVertex].Children.TryGetValue(chVertex, out int suffixLink))
-            {
-                node.SuffixLink = suffixLink;
-                break;
-            }
-            // Jump by suffix links until we reach the root or find a better prefix for the current substring.
-            if (curBetterVertex == RootNode)
-            {
-                node.SuffixLink = RootNode;
-                break;
-            }
-            // Go up by suffixlink
-            curBetterVertex = _trie[curBetterVertex].SuffixLink;
-        }
-
-        node.DictionaryLink = node.IsLeaf ? vertex : _trie[node.SuffixLink].DictionaryLink;
-
-End:;
-#if DEBUG
-        node.SuffixLinkPath = _trie[node.SuffixLink].Path;
-        node.DictionaryLinkPath = _trie[node.DictionaryLink].Path;
-#endif
     }
 
     public (int Index, int StringNumber) Find(ReadOnlySpan<char> text)
