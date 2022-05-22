@@ -1,4 +1,4 @@
-﻿// This file is part of Regal.
+// This file is part of Regal.
 // Copyright © Theodore Tsirpanis
 // Licensed under the MIT License.
 
@@ -8,6 +8,8 @@ namespace Regal.AhoCorasick;
 
 internal class TrieNode
 {
+    public const int Root = 0;
+    
     public TrieNode()
     {
         Children = new Dictionary<char, int>();

@@ -8,12 +8,10 @@ namespace Regal.AhoCorasick;
 
 internal static class AhoCorasickBuilder
 {
-    public const int RootNode = 0;
-    
     public static void BuildTrieLinks(ReadOnlySpan<TrieNode> trie)
     {
         Queue<int> vertexQueue = new Queue<int>();
-        vertexQueue.Enqueue(RootNode);
+        vertexQueue.Enqueue(TrieNode.Root);
         while (vertexQueue.TryDequeue(out int currentVertex))
         {
             CalculateSuffixAndDictionaryLinks(trie, currentVertex);
@@ -28,17 +26,17 @@ internal static class AhoCorasickBuilder
     private static void CalculateSuffixAndDictionaryLinks(ReadOnlySpan<TrieNode> trie, int vertex)
     {
         TrieNode node = trie[vertex];
-        if (vertex == RootNode)
+        if (vertex == TrieNode.Root)
         {
-            node.SuffixLink = RootNode;
-            node.DictionaryLink = RootNode;
+            node.SuffixLink = TrieNode.Root;
+            node.DictionaryLink = TrieNode.Root;
             goto End;
         }
 
         // one character substrings
-        if (node.Parent == RootNode)
+        if (node.Parent == TrieNode.Root)
         {
-            node.SuffixLink = RootNode;
+            node.SuffixLink = TrieNode.Root;
             node.DictionaryLink = node.IsLeaf ? vertex : trie[node.SuffixLink].DictionaryLink;
             goto End;
         }
@@ -58,9 +56,9 @@ internal static class AhoCorasickBuilder
                 break;
             }
             // Jump by suffix links until we reach the root or find a better prefix for the current substring.
-            if (curBetterVertex == RootNode)
+            if (curBetterVertex == TrieNode.Root)
             {
-                node.SuffixLink = RootNode;
+                node.SuffixLink = TrieNode.Root;
                 break;
             }
             // Go up by suffixlink

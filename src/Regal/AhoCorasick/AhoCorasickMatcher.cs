@@ -13,7 +13,6 @@ internal class AhoCorasickMatcher
     private readonly List<TrieNode> _trie;
     private readonly string[] _words;
     private int size;
-    private const int RootNode = 0;
 
     public ReadOnlySpan<string> Words => _words;
 
@@ -37,7 +36,7 @@ internal class AhoCorasickMatcher
 
     public void AddString(string word, int wordID)
     {
-        int currentVertex = RootNode;
+        int currentVertex = TrieNode.Root;
         for (int i = 0; i < word.Length; i++)
         {
             char c = word[i];
@@ -65,7 +64,7 @@ internal class AhoCorasickMatcher
     public (int Index, int StringNumber) Find(ReadOnlySpan<char> text)
     {
         var lastMatch = (Index: -1, StringNumber: -1);
-        int currentState = RootNode;
+        int currentState = TrieNode.Root;
 
         for (int i = 0; i < text.Length; i++)
         {
@@ -79,7 +78,7 @@ internal class AhoCorasickMatcher
                 }
                 // The algorithm effectively resets when we reach the root node.
                 // If we had found a match before, we return it.
-                if (currentState == RootNode)
+                if (currentState == TrieNode.Root)
                 {
                     if (lastMatch.Index != -1)
                     {
@@ -93,7 +92,7 @@ internal class AhoCorasickMatcher
 
             int dictLink = _trie[currentState].DictionaryLink;
 
-            if (dictLink != RootNode)
+            if (dictLink != TrieNode.Root)
             {
                 // Found a match. We mark it and continue searching hoping it is getting bigger.
                 int wordId = _trie[dictLink].WordID;
