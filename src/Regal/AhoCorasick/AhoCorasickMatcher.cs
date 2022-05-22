@@ -149,6 +149,7 @@ internal class AhoCorasickMatcher
 
     public (int Index, int StringNumber) Find(ReadOnlySpan<char> text)
     {
+        var lastMatch = (Index: -1, StringNumber: -1);
         int currentState = RootNode;
 
         for (int i = 0; i < text.Length; i++)
@@ -161,30 +162,40 @@ internal class AhoCorasickMatcher
                     currentState = nextState;
                     break;
                 }
+                // The algorithm effectively resets when we reach the root node.
+                // If we had found a match before, we return it.
                 if (currentState == RootNode)
                 {
+                    if (lastMatch.Index != -1)
+                    {
+                        return lastMatch;
+                    }
                     break;
                 }
 
                 currentState = _trie[currentState].SuffixLink;
             }
 
-            int checkState = currentState;
+            int dictLink = _trie[currentState].DictionaryLink;
 
-            // Trying to find all possible words from this prefix
-            while (true)
+            if (dictLink != RootNode)
             {
-                checkState = _trie[checkState].DictionaryLink;
-
-                if (checkState == RootNode) break;
-
-                // Found a match
-                int wordId = _trie[checkState].WordID;
+                // Found a match. We mark it and continue searching hoping it is getting bigger.
+                int wordId = _trie[dictLink].WordID;
                 int indexOfMatch = i + 1 - _words[wordId].Length;
-                return (indexOfMatch, wordId);
+
+                // We want to return the leftmost-longest match.
+                // If this match starts later than the match we might have found before,
+                // we cannot accept it because we want to return the leftmost match.
+                // The match can start at the same position as the previous one, which
+                // means that it is longer and we accept it.
+                if (lastMatch.Index == -1 || indexOfMatch <= lastMatch.Index)
+                {
+                    lastMatch = (Index: indexOfMatch, StringNumber: wordId);
+                }
             }
         }
 
-        return (-1, -1);
+        return lastMatch;
     }
 }

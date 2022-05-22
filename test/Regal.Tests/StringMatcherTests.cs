@@ -6,6 +6,7 @@ namespace Regal.Tests;
 
 public class StringMatcherTests
 {
+    // Matches the strings from the Wikipedia example.
     private readonly StringMatcher _simpleMatcher =
         new StringMatcher("a", "ab", "bab", "bc", "bca", "c", "caa");
 
@@ -17,7 +18,8 @@ public class StringMatcherTests
     [InlineData("bca", 0, 4)]
     [InlineData("c", 0, 5)]
     [InlineData("caa", 0, 6)]
-    public void Test1(string text, int index, int stringNumber)
+    [InlineData("caaa", 0, 6)]
+    public void TestSimpleMatcher(string text, int index, int stringNumber)
     {
         var result = _simpleMatcher.Find(text);
         Assert.Equal((index, stringNumber), result);
