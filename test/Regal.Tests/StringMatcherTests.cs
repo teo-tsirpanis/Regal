@@ -24,4 +24,15 @@ public class StringMatcherTests
         var result = _simpleMatcher.Find(text);
         Assert.Equal((index, stringNumber), result);
     }
+
+    [Theory]
+    [InlineData("a", 1)]
+    [InlineData("aa", 2)]
+    [InlineData("caa", 1)]
+    [InlineData("caaa", 2)]
+    public void TestCount(string text, int count)
+    {
+        var result = _simpleMatcher.Count(text);
+        Assert.Equal(count, result);
+    }
 }

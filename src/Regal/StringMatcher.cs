@@ -53,4 +53,23 @@ public sealed class StringMatcher
     {
         return _matcher.Find(text);
     }
+    
+    public int Count(ReadOnlySpan<char> text)
+    {
+        ReadOnlySpan<string> words = Words;
+        int count = 0;
+        while (true)
+        {
+            var findResult = Find(text);
+            if (findResult.Index == -1)
+            {
+                break;
+            }
+
+            count++;
+            text = text[(findResult.Index + words[findResult.StringNumber].Length)..];
+        }
+
+        return count;
+    }
 }
