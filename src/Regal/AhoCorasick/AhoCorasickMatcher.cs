@@ -11,7 +11,7 @@ internal class TrieNode
     public TrieNode()
     {
         Children = new Dictionary<char, int>();
-        Leaf = false;
+        IsLeaf = false;
         Parent = -1;
         ParentCharacter = char.MaxValue;
         SuffixLink = -1;
@@ -21,7 +21,7 @@ internal class TrieNode
 
     public Dictionary<char, int> Children;
 
-    public bool Leaf;
+    public bool IsLeaf;
 
     public int Parent;
 
@@ -77,7 +77,7 @@ internal class AhoCorasickMatcher
             currentVertex = nextVertex; // Move to the new vertex in the trie
         }
         // Mark the end of the word and store its ID
-        _trie[currentVertex].Leaf = true;
+        _trie[currentVertex].IsLeaf = true;
         _trie[currentVertex].WordID = wordID;
     }
 
@@ -85,68 +85,60 @@ internal class AhoCorasickMatcher
     {
         Queue<int> vertexQueue = new Queue<int>();
         vertexQueue.Enqueue(RootNode);
-        while (vertexQueue.Count > 0)
+        while (vertexQueue.TryDequeue(out int currentVertex))
         {
-            int currentVertex = vertexQueue.Dequeue();
             CalculateSuffixAndDictionaryLinks(currentVertex);
 
-            foreach (char key in _trie[currentVertex].Children.Keys)
+            foreach (int vertex in _trie[currentVertex].Children.Values)
             {
-                vertexQueue.Enqueue(_trie[currentVertex].Children[key]);
+                vertexQueue.Enqueue(vertex);
             }
         }
     }
 
     private void CalculateSuffixAndDictionaryLinks(int vertex)
     {
+        TrieNode node = _trie[vertex];
         if (vertex == RootNode)
         {
-            _trie[vertex].SuffixLink = RootNode;
-            _trie[vertex].DictionaryLink = RootNode;
+            node.SuffixLink = RootNode;
+            node.DictionaryLink = RootNode;
             return;
         }
 
         // one character substrings
-        if (_trie[vertex].Parent == RootNode)
+        if (node.Parent == RootNode)
         {
-            _trie[vertex].SuffixLink = RootNode;
-            if (_trie[vertex].Leaf) _trie[vertex].DictionaryLink = vertex;
-            else _trie[vertex].DictionaryLink = _trie[_trie[vertex].SuffixLink].DictionaryLink;
+            node.SuffixLink = RootNode;
+            node.DictionaryLink = node.IsLeaf ? vertex : _trie[node.SuffixLink].DictionaryLink;
             return;
         }
 
         // To calculate the suffix link for the current vertex, we need the suffix
         // link for the parent and the character that moved us to the
         // current vertex.
-        int curBetterVertex = _trie[_trie[vertex].Parent].SuffixLink;
-        char chVertex = _trie[vertex].ParentCharacter;
+        int curBetterVertex = _trie[node.Parent].SuffixLink;
+        char chVertex = node.ParentCharacter;
         while (true)
         {
             // If there is an edge with the needed char, update the suffix link
             // and leave the cycle
             if (_trie[curBetterVertex].Children.TryGetValue(chVertex, out int suffixLink))
             {
-                _trie[vertex].SuffixLink = suffixLink;
+                node.SuffixLink = suffixLink;
                 break;
             }
             // Jump by suffix links until we reach the root or find a better prefix for the current substring.
             if (curBetterVertex == RootNode)
             {
-                _trie[vertex].SuffixLink = RootNode;
+                node.SuffixLink = RootNode;
                 break;
             }
             // Go up by suffixlink
             curBetterVertex = _trie[curBetterVertex].SuffixLink;
         }
 
-        if (_trie[vertex].Leaf)
-        {
-            _trie[vertex].DictionaryLink = vertex;
-        }
-        else
-        {
-            _trie[vertex].DictionaryLink = _trie[_trie[vertex].SuffixLink].DictionaryLink;
-        }
+        node.DictionaryLink = node.IsLeaf ? vertex : _trie[node.SuffixLink].DictionaryLink;
     }
 
     public (int Index, int StringNumber) Find(ReadOnlySpan<char> text)
