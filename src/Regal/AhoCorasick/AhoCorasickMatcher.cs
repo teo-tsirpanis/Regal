@@ -41,6 +41,8 @@ internal class AhoCorasickMatcher
     private int size;
     private const int RootNode = 0;
 
+    public ReadOnlySpan<string> Words => _words;
+
     public AhoCorasickMatcher(ReadOnlySpan<string> words)
     {
         _trie = new List<TrieNode>() { new TrieNode() };

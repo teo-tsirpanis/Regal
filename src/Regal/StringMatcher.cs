@@ -10,13 +10,10 @@ public sealed class StringMatcher
 {
     private readonly AhoCorasickMatcher _matcher;
 
-    private readonly string[] _words;
-
-    public ReadOnlySpan<string> Words => _words;
+    public ReadOnlySpan<string> Words => _matcher.Words;
 
     public StringMatcher(ReadOnlySpan<string> words)
     {
-        _words = words.ToArray();
         Init(words, out _matcher);
     }
 
@@ -25,8 +22,8 @@ public sealed class StringMatcher
         ArgumentException.ThrowIfNullOrEmpty(firstWord);
         ArgumentNullException.ThrowIfNull(otherWords);
 
-        _words = Utilities.ToArrayPrefixed(firstWord, otherWords);
-        Init(_words, out _matcher);
+        string[] words = Utilities.ToArrayPrefixed(firstWord, otherWords);
+        Init(words, out _matcher);
     }
 
     private static void ValidateWords(ReadOnlySpan<string> words)
