@@ -103,7 +103,9 @@ internal class AhoCorasickMatcher
                 // we cannot accept it because we want to return the leftmost match.
                 // The match can start at the same position as the previous one, which
                 // means that it is longer and we accept it.
-                if (lastMatch.Index == -1 || indexOfMatch <= lastMatch.Index)
+                // The unsigned integer comparison will also always
+                // succeed if the last match index is negative.
+                if ((uint) indexOfMatch <= (uint) lastMatch.Index)
                 {
                     lastMatch = (Index: indexOfMatch, StringNumber: wordId);
                 }
