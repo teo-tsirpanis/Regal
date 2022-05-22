@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regal.Tests", "test\Regal.Tests\Regal.Tests.csproj", "{889642D1-1D78-43CB-B21D-678E1873008C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{E4668E38-2F4C-4822-8075-31F582276649}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4668E38-2F4C-4822-8075-31F582276649}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4668E38-2F4C-4822-8075-31F582276649}.Release|Any CPU.Build.0 = Release|Any CPU
+		{889642D1-1D78-43CB-B21D-678E1873008C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{889642D1-1D78-43CB-B21D-678E1873008C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{889642D1-1D78-43CB-B21D-678E1873008C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{889642D1-1D78-43CB-B21D-678E1873008C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
