@@ -32,6 +32,15 @@ internal class TrieNode
     public int DictionaryLink;
 
     public int WordID;
+
+#if DEBUG
+    public string? Path;
+    public string? SuffixLinkPath;
+    public string? DictionaryLinkPath;
+
+    public override string ToString() =>
+        $"Path: {Path} Suffix Link: {SuffixLinkPath} Dictionary Link: {DictionaryLinkPath}";
+#endif
 }
 
 internal class AhoCorasickMatcher
@@ -45,7 +54,11 @@ internal class AhoCorasickMatcher
 
     public AhoCorasickMatcher(ReadOnlySpan<string> words)
     {
-        _trie = new List<TrieNode>() { new TrieNode() };
+        TrieNode rootNode = new TrieNode();
+#if DEBUG
+        rootNode.Path = "<root>";
+#endif
+        _trie = new List<TrieNode>() { rootNode };
         _words = words.ToArray();
         size = 1;
 
@@ -60,16 +73,19 @@ internal class AhoCorasickMatcher
     public void AddString(string word, int wordID)
     {
         int currentVertex = RootNode;
-        foreach (char c in word)
+        for (int i = 0; i < word.Length; i++)
         {
-            int nextVertex;
-            if (!_trie[currentVertex].Children.TryGetValue(c, out nextVertex))
+            char c = word[i];
+            if (!_trie[currentVertex].Children.TryGetValue(c, out int nextVertex))
             {
                 _trie.Add(new TrieNode()
                 {
                     SuffixLink = -1, // If not - add vertex
                     Parent = currentVertex,
-                    ParentCharacter = c
+                    ParentCharacter = c,
+#if DEBUG
+                    Path = word.AsSpan(0, i + 1).ToString()
+#endif
                 });
                 _trie[currentVertex].Children[c] = nextVertex = size;
                 size++;
@@ -103,7 +119,7 @@ internal class AhoCorasickMatcher
         {
             node.SuffixLink = RootNode;
             node.DictionaryLink = RootNode;
-            return;
+            goto End;
         }
 
         // one character substrings
@@ -111,7 +127,7 @@ internal class AhoCorasickMatcher
         {
             node.SuffixLink = RootNode;
             node.DictionaryLink = node.IsLeaf ? vertex : _trie[node.SuffixLink].DictionaryLink;
-            return;
+            goto End;
         }
 
         // To calculate the suffix link for the current vertex, we need the suffix
@@ -139,6 +155,12 @@ internal class AhoCorasickMatcher
         }
 
         node.DictionaryLink = node.IsLeaf ? vertex : _trie[node.SuffixLink].DictionaryLink;
+
+End:;
+#if DEBUG
+        node.SuffixLinkPath = _trie[node.SuffixLink].Path;
+        node.DictionaryLinkPath = _trie[node.DictionaryLink].Path;
+#endif
     }
 
     public (int Index, int StringNumber) Find(ReadOnlySpan<char> text)
