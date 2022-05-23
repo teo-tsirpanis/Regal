@@ -4,11 +4,45 @@
 
 // Adapted from https://github.com/pgovind/runtime/blob/8f686549aa6014926ec244a32d961b090a72d9f8/src/libraries/System.Text.RegularExpressions/src/System/Text/RegularExpressions/RegexAhoCorasick.cs
 
+using System.Runtime.InteropServices;
+
 namespace Regal.AhoCorasick;
 
 internal static class AhoCorasickBuilder
 {
-    public static void BuildTrieLinks(ReadOnlySpan<TrieNode> trie)
+    public static List<TrieNode> BuildTrie(ReadOnlySpan<string> words)
+    {
+        List<TrieNode> trie = new() { new TrieNode() };
+
+        for (int i = 0; i < words.Length; i++)
+        {
+            AddStringToTrie(trie, words[i], i);
+        }
+
+        // That gives us the assurance that no new trie nodes will be created.
+        BuildTrieLinks(CollectionsMarshal.AsSpan(trie));
+
+        return trie;
+    }
+
+    private static void AddStringToTrie(List<TrieNode> trie, string word, int wordID)
+    {
+        int currentVertex = TrieNode.Root;
+        for (int i = 0; i < word.Length; i++)
+        {
+            TrieNode currentNode = trie[currentVertex];
+            char c = word[i];
+            if (!currentNode.Children.TryGetValue(c, out int nextVertex))
+            {
+                TrieNode newNode = new TrieNode(currentVertex, word, wordID, i);
+                currentNode.Children[c] = nextVertex = trie.Count;
+                trie.Add(newNode);
+            }
+            currentVertex = nextVertex; // Move to the new vertex in the trie
+        }
+    }
+
+    private static void BuildTrieLinks(ReadOnlySpan<TrieNode> trie)
     {
         Queue<int> vertexQueue = new Queue<int>();
         vertexQueue.Enqueue(TrieNode.Root);

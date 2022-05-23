@@ -6,37 +6,46 @@
 
 namespace Regal.AhoCorasick;
 
-internal class TrieNode
+internal sealed class TrieNode
 {
     public const int Root = 0;
-    
-    public TrieNode()
+
+    public TrieNode(int parent, string word, int wordId, int charIndex)
     {
-        Children = new Dictionary<char, int>();
-        IsLeaf = false;
-        Parent = -1;
-        AccessingCharacter = char.MaxValue;
-        SuffixLink = -1;
-        WordID = -1;
-        DictionaryLink = -1;
+        Parent = parent;
+        AccessingCharacter = word[charIndex];
+        WordId = charIndex == word.Length -1 ? wordId : -1;
+#if DEBUG
+            Path = word.AsSpan(0, charIndex + 1).ToString();
+#endif
     }
 
-    public Dictionary<char, int> Children;
+    public TrieNode()
+    {
+        Parent = -1;
+        AccessingCharacter = '\0';
+        WordId = -1;
+#if DEBUG
+            Path = "<root>";
+#endif
+    }
 
-    public bool IsLeaf;
+    public Dictionary<char, int> Children = new();
 
-    public int Parent;
+    public bool IsLeaf => WordId != -1;
 
-    public char AccessingCharacter;
+    public readonly int Parent;
 
-    public int SuffixLink;
+    public readonly char AccessingCharacter;
 
-    public int DictionaryLink;
+    public readonly int WordId = -1;
 
-    public int WordID;
+    public int SuffixLink = -1;
+
+    public int DictionaryLink = -1;
 
 #if DEBUG
-    public string? Path;
+    public readonly string Path;
     public string? SuffixLinkPath;
     public string? DictionaryLinkPath;
 
