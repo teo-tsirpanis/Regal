@@ -35,4 +35,12 @@ public class StringMatcherTests
         var result = _simpleMatcher.Count(text);
         Assert.Equal(count, result);
     }
+
+    [Fact]
+    public void TestEmpty()
+    {
+        var matcher = new StringMatcher();
+        var result = matcher.Find("foo");
+        Assert.Equal((-1, -1), result);
+    }
 }

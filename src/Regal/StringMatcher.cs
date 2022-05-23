@@ -17,27 +17,19 @@ public sealed class StringMatcher
         Init(words, out _matcher);
     }
 
-    public StringMatcher(string firstWord, params string[] otherWords)
+    public StringMatcher(params string[] words)
     {
-        ArgumentException.ThrowIfNullOrEmpty(firstWord);
-        ArgumentNullException.ThrowIfNull(otherWords);
-
-        string[] words = Utilities.ToArrayPrefixed(firstWord, otherWords);
+        ArgumentNullException.ThrowIfNull(words);
         Init(words, out _matcher);
     }
 
     private static void ValidateWords(ReadOnlySpan<string> words)
     {
-        if (words.IsEmpty)
+        for (int i = 0; i < words.Length; i++)
         {
-            throw new ArgumentException("Word list must not be empty.", nameof(words));
-        }
-
-        foreach (string s in words)
-        {
-            if (string.IsNullOrEmpty(s))
+            if (string.IsNullOrEmpty(words[i]))
             {
-                throw new ArgumentException("Word must not be null or empty.", nameof(words));
+                throw new ArgumentException("Word must not be null or empty.", $"{nameof(words)}[{i}]");
             }
         }
     }
