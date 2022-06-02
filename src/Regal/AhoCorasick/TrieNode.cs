@@ -16,7 +16,7 @@ internal sealed class TrieNode
         AccessingCharacter = word[charIndex];
         WordId = charIndex == word.Length -1 ? wordId : -1;
 #if DEBUG
-            Path = word.AsSpan(0, charIndex + 1).ToString();
+        Path = word.AsSpan(0, charIndex + 1).ToString();
 #endif
     }
 
@@ -26,13 +26,13 @@ internal sealed class TrieNode
         AccessingCharacter = '\0';
         WordId = -1;
 #if DEBUG
-            Path = "<root>";
+        Path = "<root>";
 #endif
     }
 
     public Dictionary<char, int> Children = new();
 
-    public bool IsLeaf => WordId != -1;
+    public bool IsMatch => WordId != -1;
 
     public readonly int Parent;
 

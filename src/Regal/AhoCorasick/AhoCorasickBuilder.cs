@@ -71,7 +71,7 @@ internal static class AhoCorasickBuilder
         if (node.Parent == TrieNode.Root)
         {
             node.SuffixLink = TrieNode.Root;
-            node.DictionaryLink = node.IsLeaf ? vertex : trie[node.SuffixLink].DictionaryLink;
+            node.DictionaryLink = node.IsMatch ? vertex : trie[node.SuffixLink].DictionaryLink;
             goto End;
         }
 
@@ -99,7 +99,7 @@ internal static class AhoCorasickBuilder
             curBetterVertex = trie[curBetterVertex].SuffixLink;
         }
 
-        node.DictionaryLink = node.IsLeaf ? vertex : trie[node.SuffixLink].DictionaryLink;
+        node.DictionaryLink = node.IsMatch ? vertex : trie[node.SuffixLink].DictionaryLink;
 
 End:;
 #if DEBUG
