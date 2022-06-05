@@ -15,6 +15,7 @@ internal sealed class TrieNode
         Parent = parent;
         AccessingCharacter = word[charIndex];
         WordId = charIndex == word.Length -1 ? wordId : -1;
+        Depth = charIndex + 1;
 #if DEBUG
         Path = word.AsSpan(0, charIndex + 1).ToString();
 #endif
@@ -25,6 +26,7 @@ internal sealed class TrieNode
         Parent = -1;
         AccessingCharacter = '\0';
         WordId = -1;
+        Depth = 0;
 #if DEBUG
         Path = "<root>";
 #endif
@@ -39,6 +41,8 @@ internal sealed class TrieNode
     public readonly char AccessingCharacter;
 
     public readonly int WordId = -1;
+
+    public readonly int Depth;
 
     public int SuffixLink = -1;
 
