@@ -1,2 +1,2 @@
 # Regal
-A vectorized string matcher.
+A testbed project for innovations in `System.Text.RegularExpressions`.
